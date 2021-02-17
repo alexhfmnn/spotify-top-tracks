@@ -6,9 +6,8 @@ Script.complete()
 async function createWidget() {
 
     let args = await getWidgetArgs()
-    // let args_amount = args["amount"]
-    let args_amount = args
-    // let args_period = args["period"]
+    let args_amount = args["amount"]
+    let args_period = args["period"]
 
     let widget = new ListWidget()
     let spotifyIcon = await getImage("spotify-icon.png")
@@ -24,7 +23,7 @@ async function createWidget() {
     spotifyCredentials = await loadSpotifyCredentials()
     if(spotifyCredentials != null) {
       widget.url = "spotify://"
-      let topTracks = await loadTopTracks(args_amount)
+      let topTracks = await loadTopTracks(args_amount, args_period)
       if(topTracks != null) {
         let titles = []
         let artists = []
@@ -44,7 +43,22 @@ async function createWidget() {
 
         // header
         let header = titleStack.addStack()
-        let widgettitle = header.addText("Spotify Top Tracks")
+        let widgettitletext = "Spotify Top Tracks"
+        switch (args_period) {
+          case "short_term":
+            widgettitletext += " - last 4 weeks"
+            break
+          case "medium_term":
+            widgettitletext += " - last 6 months"
+            break
+          case "long_term":
+            widgettitletext += " - all time"
+            break
+          default:
+            widgettitletext += " - UNKNOWN TIME PERIOD"
+            break
+        }
+        let widgettitle = header.addText(widgettitletext)
         widgettitle.font = Font.mediumSystemFont(12)
         widgettitle.textColor = Color.white()
         widgettitle.leftAlignText()
@@ -97,15 +111,15 @@ async function createWidget() {
 }
 
 // get TopTracks via Spotify Web API
-async function loadTopTracks(query_amount) {
-	const req = new Request("https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=" + query_amount)
+async function loadTopTracks(query_amount, query_period) {
+	const req = new Request("https://api.spotify.com/v1/me/top/tracks?time_range=" + query_period + "&limit=" + query_amount)
 	req.headers = { "Authorization": "Bearer " + spotifyCredentials.accessToken, "Content-Type": "application/json" }
 	let npResult = await req.load()
 	    if (req.response.statusCode == 401) {
       // access token expired, trying to refresh
       let success = await refreshSpotifyAccessToken()
       if(success) {
-        return await loadTopTracks(query_amount)
+        return await loadTopTracks(query_amount, query_period)
       } else {
         return null
       }
@@ -138,6 +152,15 @@ async function loadSpotifyCredentials() {
 // helper function to check not empty strings
 function isNotEmpty(stringToCheck) {
   if (stringToCheck != null && stringToCheck.length > 0) {
+    return true
+  } else {
+    return false
+  }
+}
+
+// helper function to check if there are two arguments passed
+function argumentLength(paramsToCheck) {
+  if (paramsToCheck != null && paramsToCheck.length == 2) {
     return true
   } else {
     return false
@@ -192,20 +215,40 @@ async function loadImage(imgUrl) {
     return await req.loadImage()
 }
 
+
 async function getWidgetArgs() {
-  let default_val = 10
-  if (isNotEmpty(args.widgetParameter)) {
-    let params = parseInt(args.widgetParameter)
-    console.log(params)
-    if (params <= 10) {
-      return params
+  let default_val_amount = 10
+  let default_val_period = "short_term"
+  if (argumentLength(args.widgetParameter)) {
+    let params = args.widgetParameter.split(",")
+    let amount = parseInt(params[0])
+    let period = params[1].trim()
+    // period is invalid
+    if (period != "short" && period != "medium" && period != "long") {
+      // period invalid, amount valid
+      if (amount <= 10) {
+        return {"amount": amount, "period": default_val_period}
+      }
+      // period invalid, amount invalid
+      else {
+        return {"amount": default_val_amount, "period": default_val_period}
+      }
     }
+    // period valid
     else {
-      return default_val
+      period += "_term"
+      // both valid
+      if (amount <= 10) {
+          return {"amount": amount, "period": period}
+        }
+        // period valid, amount invalid
+        else {
+          return {"amount": default_val_amount, "period": period}
+        }
     }
   }
+  // no arguments passed to widget
   else {
-    console.log("no widget args set")
-    return default_val
+    return {"amount": default_val_amount, "period": default_val_period}
   }
 }
