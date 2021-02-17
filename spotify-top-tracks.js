@@ -12,7 +12,13 @@ async function createWidget() {
 
     let widget = new ListWidget()
     let spotifyIcon = await getImage("spotify-icon.png")
-    widget.backgroundColor = new Color("1e2040")
+    let startcolor = new Color("3c3c3c")
+    let endcolor = new Color("111111")
+    let gradient = new LinearGradient()
+    gradient.colors = [startcolor,endcolor]
+    gradient.locations = [0.0,1]
+    widget.backgroundGradient = gradient
+    // widget.backgroundColor = new Color("1e2040")
     
     // load spotify credentials from iCloud Drive
     spotifyCredentials = await loadSpotifyCredentials()
