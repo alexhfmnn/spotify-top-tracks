@@ -34,7 +34,7 @@ Widget for iOS 14 showing your most listened to tracks within the past four week
 - Copy [the code from this repo](https://raw.githubusercontent.com/alexhfmnn/spotify-top-tracks/main/spotify-top-tracks.js) into the clipboard
 - Paste it in a new Scriptable script
 - Create a new Scriptable widget, choose a layout (*last one recommended*)
-- optionally: Under Parameters select how many tracks will be shown (max currently is 10)
+- Under Parameters select how many tracks will be shown (max is 10) and select the period ([1-10],["short", "medium", "long"])
 
-<img src="https://user-images.githubusercontent.com/45359966/108242260-0083f300-714d-11eb-9a57-6354a737cca4.PNG" width="200" /> | <img src="https://user-images.githubusercontent.com/45359966/108242906-c36c3080-714d-11eb-8c3a-a604c9a8a7ff.PNG" width="200" />
+<img src="https://user-images.githubusercontent.com/45359966/108242260-0083f300-714d-11eb-9a57-6354a737cca4.PNG" width="200" /> | <img src="https://user-images.githubusercontent.com/45359966/108352883-c287dd00-71e7-11eb-8ccd-8ac0ee9637eb.PNG" width="200" />
 
