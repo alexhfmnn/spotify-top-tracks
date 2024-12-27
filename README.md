@@ -2,34 +2,46 @@
 
 Based on: https://gist.github.com/marco79cgn/79a6a265d978dc22cc2a12058b24e02b
 
-Widget for iOS 14 showing your most listened to tracks within the past four weeks.
+Widget for iOS 18 showing your most listened to tracks within the past four weeks.
 
 ### Installation
 #### Spotify prerequisites
-*Instructions from [Authorization Code Flow](https://developer.spotify.com/documentation/general/guides/authorization-guide/#authorization-code-flow)* <br>
+*Instructions from [Authorization Code Flow](https://developer.spotify.com/documentation/web-api/concepts/authorization#authorization-code-flow)* <br>
 1.) Go to [Spotify Developer API](https://developer.spotify.com/dashboard/login) and create a new Application <br>
-2.) Hit "Edit Settings" and add *https://spotify.com* as Redirect URI <br>
-3.) Store *Client ID* and *Client Secret* in an Editor <br>
-4.) Open a new incognito browser tab: https://accounts.spotify.com/authorize?client_id=YOURCLIENTID&response_type=code&redirect_uri=https%3A%2F%2Fspotify.com&scope=user-top-read (**Make sure to replace YOURCLIENTID**) <br>
+2.) Click "Edit Settings" and add *https://spotify.com* as Redirect URI <br>
+3.) Open a Bash and set *Client ID* and *Client Secret* as environment variables
+```bash
+export CLIENT_ID=1234567890 # EDIT && \
+export CLIENT_SECRET=mfq837wfgw8wvcg673gnfm # EDIT && \
+export REDIRECT_URI=https%3A%2F%2Fspotify.com && \
+export BEARER=$(echo -n "${CLIENT_ID}:${CLIENT_SECRET}" | base64)
+```
+4.) Open a new incognito browser tab: [https://accounts.spotify.com/authorize?client_id=\<YOURCLIENTID\>&response_type=code&redirect_uri=https%3A%2F%2Fspotify.com&scope=user-top-read](https://accounts.spotify.com/authorize?client_id=<YOURCLIENTID>&response_type=code&redirect_uri=https%3A%2F%2Fspotify.com&scope=user-top-read) (**Make sure to replace \<YOURCLIENTID\> within the URL**) <br>
 5.) Click "Accept" <br>
-6.) You will be redirected to something like https://www.spotify.com/de/?code=AQD4q4v6Klt9ZW5VtTbnbHAWDLKK8y1t6Ammov..... <br>
-7.) Store this *code* once again in an Editor <br>
-8.) (Base64 Encode)[https://www.base64encode.org/] "<client_id>:<client_secret>" <br>
-9.) `curl -H "Authorization: Basic ZjM...zE=" -d grant_type=authorization_code -d code=MQCbtKe...44KN -d redirect_uri=https%3A%2F%2Fspotify.com https://accounts.spotify.com/api/token > spotify_access_token.json`, where ZjM...zE= is the Base64 encoded string from Step 8 and MQCbtKe...44KN the code from step 7 <br>
-10.) You'll receive an access and a refresh token <br>
-11.) Create a new File called *spotify-credentials.json* using all your collected data:
+6.) You will be redirected to something like [https://www.spotify.com/de/?code=AQD4q4v6Klt9ZW5VtTbnbHAWDLKK8y1t6Ammov.....](https://www.spotify.com/de/?code=AQD4q4v6Klt9ZW5VtTbnbHAWDLKK8y1t6Ammov.....) <br>
+7.) Store this *code* once again in an environment variable <br>
+```bash
+export RETURN_CODE=AQD4q4v6Klt9ZW5VtTbnbHAWDLKK8y1t6Ammov.....
+```
+8.) Run the below command without any modifications
+```bash
+curl -H "Authorization: Basic ${BEARER}" -d grant_type=authorization_code -d code=${RETURN_CODE} -d redirect_uri=${REDIRECT_URI} https://accounts.spotify.com/api/token > spotify_access_token.json && \
+cat spotify_access_token.json
+```
+9.) You'll receive an access and a refresh token <br>
+10.) Create a new File called *spotify-credentials.json* using all your collected data:
 ```json
 {
   "clientSecret": "YOURCLIENTSECRET",
   "clientId": "YOURCLIENTID",
-  "accessToken": "ACCESS TOKEN FROM STEP 10",
-  "refreshToken": "REFRESH TOKEN FROM STEP 10"
+  "accessToken": "ACCESS TOKEN FROM STEP 8",
+  "refreshToken": "REFRESH TOKEN FROM STEP 8"
 }
 ```
-12.) Store this JSON File in your iCloud Drive under *Scriptable/spotify-credentials.json*
+11.) Store this JSON File in your iCloud Drive under *Scriptable/spotify-credentials.json*
 
 #### iDevice prerequisites
-- Make sure to have iOS 14 installed
+- Make sure to have iOS 18 installed
 - Download [Scriptable App](https://apps.apple.com/de/app/scriptable/id1405459188)
 - Copy [the code from this repo](https://raw.githubusercontent.com/alexhfmnn/spotify-top-tracks/main/spotify-top-tracks.js) into the clipboard
 - Paste it in a new Scriptable script
